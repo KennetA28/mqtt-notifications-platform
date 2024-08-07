@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { connect, MqttClient } from 'mqtt';
-import { error, info } from 'ps-logger';
+import { debug, error, info } from 'ps-logger';
 
 @Injectable()
 export class MqttService implements OnModuleInit {
@@ -18,24 +18,32 @@ export class MqttService implements OnModuleInit {
         if (!host || !port || !clientId || !username || !password) {
             throw Error("MQTT config isn't valid, please check it")
         }
-        info(`Connecting with ${host}`)
-        const connectUrl = `mqtt://${host}:${port}`
+        info(`Connecting with: ${host}`)
+        const connectUrl = `mqtts://${host}:${port}`
         this.mqttClient = connect(connectUrl, {
             clientId,
             clean: true,
-            connectTimeout: 4000,
+            connectTimeout: 2000,
             username,
             password,
             reconnectPeriod: 1000,
-           
+           log(...args) {
+               debug(args)
+           },
         })
         this.mqttClient.on("connect", function () {
             info("Connected to CloudMQTT");
           });
       
-          this.mqttClient.on("error", function () {
-            error("Error in connecting to CloudMQTT");
+          this.mqttClient.on("error", function (e) {
+            error("Error in connecting to CloudMQTT:"+e.message,);
           });
     }
 
+
+    publish(topic: string, payload: string): string {
+        info(`Publishing to ${topic}`);
+        this.mqttClient.publish(topic, payload);
+        return `Publishing to ${topic}`;
+      }
 }

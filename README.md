@@ -9,9 +9,13 @@ You can run this project with Nodejs If you prefer
 
 ## Enviroments
 
-For set env you can include the next argument in command:
-```CMD
- your_start_command && node --env-file=.env
-```
-This argument set env file, it's not necesary you install dotenv package. You must have Bun, Nodejs 22 or newer
+You need set env file path in app.module
 
+```TS
+@Module({
+  imports: [ConfigModule.forRoot({
+    envFilePath:'.env',
+    isGlobal:true
+  })],
+})
+```
